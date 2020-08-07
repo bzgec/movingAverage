@@ -5,11 +5,13 @@
 
 #define MOV_AVG_FILTER_STRENGTH_MAX_BYTE  20  // max filter strength
 #define MOV_AVG_FILTER_STRENGTH_MAX_WORD  20  // max filter strength
+#define MOV_AVG_FILTER_STRENGTH_MAX_SHORT 20  // max filter strength
 #define MOV_AVG_FILTER_STRENGTH_MAX_FLOAT 20  // max filter strength
 
 // Which type of variables are you using:
 #define USING_BYTE
 #define USING_WORD
+#define USING_SHORT
 #define USING_FLOAT
 
 #define MOV_AVG_FILTER_STRENGTH_MAX 65535
@@ -55,6 +57,18 @@ typedef struct movingAvg_handle_w_STRUCTURE {
 } movingAvg_handle_w_S;
 #endif  // USING_WORD
 
+#ifdef USING_SHORT
+typedef struct movingAvg_handle_sh_STRUCTURE {
+    int16_t ashOldNumbers[MOV_AVG_FILTER_STRENGTH_MAX_SHORT];
+    int16_t shAverage;
+    int32_t lSum;
+    uint16_t wFilterStrength;
+    uint16_t wPos;
+    uint16_t wStartPos;
+    uint8_t bIsInitialized;
+} movingAvg_handle_sh_S;
+#endif  // USING_SHORT
+
 #ifdef USING_FLOAT
 typedef struct movingAvg_handle_f_STRUCTURE {
     float afOldNumbers[MOV_AVG_FILTER_STRENGTH_MAX_FLOAT];
@@ -68,15 +82,17 @@ typedef struct movingAvg_handle_f_STRUCTURE {
 #endif  // USING_FLOAT
 
 
-#if (MOV_AVG_FILTER_STRENGTH_MAX_BYTE  > 65535 || \
-     MOV_AVG_FILTER_STRENGTH_MAX_WORD  > 65535 || \
-     MOV_AVG_FILTER_STRENGTH_MAX_FLOAT > 65535)
+#if (MOV_AVG_FILTER_STRENGTH_MAX_BYTE   > 65535 || \
+     MOV_AVG_FILTER_STRENGTH_MAX_WORD   > 65535 || \
+     MOV_AVG_FILTER_STRENGTH_MAX_SHORT  > 65535 || \
+     MOV_AVG_FILTER_STRENGTH_MAX_FLOAT  > 65535)
 #error 'MOV_AVG_FILTER_STRENGTH_MAX_x' should not be hihger than 65535!
 #endif
 
-#if (MOV_AVG_FILTER_STRENGTH_MAX_BYTE  < 2 || \
-     MOV_AVG_FILTER_STRENGTH_MAX_WORD  < 2 || \
-     MOV_AVG_FILTER_STRENGTH_MAX_FLOAT < 2)
+#if (MOV_AVG_FILTER_STRENGTH_MAX_BYTE   < 2 || \
+     MOV_AVG_FILTER_STRENGTH_MAX_WORD   < 2 || \
+     MOV_AVG_FILTER_STRENGTH_MAX_SHORT  < 2 || \
+     MOV_AVG_FILTER_STRENGTH_MAX_FLOAT  < 2)
 #error 'MOV_AVG_FILTER_STRENGTH_MAX_x' should not be smaller than 2!
 #endif
 
@@ -93,6 +109,11 @@ uint8_t movingAvg_calc_by(movingAvg_handle_by_S *pHandle, uint8_t byNewValue);
 uint8_t movingAvg_init_w(movingAvg_handle_w_S *pHandle, uint16_t wFilterStrength);
 uint16_t movingAvg_calc_w(movingAvg_handle_w_S *pHandle, uint16_t wNewValue);
 #endif  // USING_WORD
+
+#ifdef USING_SHORT
+uint8_t movingAvg_init_sh(movingAvg_handle_sh_S *pHandle, uint16_t wFilterStrength);
+int16_t movingAvg_calc_sh(movingAvg_handle_sh_S *pHandle, int16_t shNewValue);
+#endif  // USING_SHORT
 
 #ifdef USING_FLOAT
 uint8_t movingAvg_init_f(movingAvg_handle_f_S *pHandle, uint16_t wFilterStrength);

@@ -2,6 +2,10 @@
 
 // code copied and modified from from https://gist.github.com/bmccormack/d12f4bf0c96423d03f82
 
+#ifndef NULL
+#define NULL 0
+#endif  // NULL
+
 static void my_memset(void *pDest, char cValue, uint16_t wLen);
 
 
@@ -105,6 +109,52 @@ uint16_t movingAvg_calc_w(movingAvg_handle_w_S *pHandle, uint16_t wNewValue) {
     return pHandle->wAverage;
 }
 #endif  // USING_WORD
+
+
+#ifdef USING_SHORT
+uint8_t movingAvg_init_sh(movingAvg_handle_sh_S *pHandle, uint16_t wFilterStrength) {
+    uint8_t bError = TRUE;
+    if(pHandle != NULL) {
+        my_memset(pHandle, 0, sizeof(movingAvg_handle_sh_S));
+        if(wFilterStrength <= MOV_AVG_FILTER_STRENGTH_MAX_SHORT) {
+            pHandle->bIsInitialized = TRUE;
+            pHandle->wFilterStrength = wFilterStrength;
+            bError = FALSE;
+        }
+    }
+    return bError;
+}
+
+int16_t movingAvg_calc_sh(movingAvg_handle_sh_S *pHandle, int16_t shNewValue) {
+    if(pHandle != NULL) {
+        if(pHandle->bIsInitialized == TRUE) {
+            // Subtract the oldest number from previous sum and add new number
+            pHandle->lSum = pHandle->lSum - pHandle->ashOldNumbers[pHandle->wPos] + shNewValue;
+
+            // Assign the new value to the position in the array
+            pHandle->ashOldNumbers[pHandle->wPos++] = shNewValue;
+
+            if(pHandle->wPos >= pHandle->wFilterStrength) {
+                pHandle->wPos = 0;
+            }
+
+            // Calculate the average
+            if(pHandle->wStartPos < pHandle->wFilterStrength) {
+                pHandle->wStartPos++;
+                pHandle->shAverage = pHandle->lSum / pHandle->wStartPos;
+            } else {
+                pHandle->shAverage = pHandle->lSum / pHandle->wFilterStrength;
+            }
+        } else {
+            pHandle->shAverage = 0;
+        }
+
+    }
+
+    return pHandle->shAverage;
+}
+#endif  // USING_SHORT
+
 
 #ifdef USING_FLOAT
 uint8_t movingAvg_init_f(movingAvg_handle_f_S *pHandle, uint16_t wFilterStrength) {
